@@ -12,7 +12,7 @@ export default function Home() {
     await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate a delay
     return {
       data: {
-        getSignatureMessage: "This is a placeholder signature message.",
+        getSignatureMessage: "placeholderMessage",
       },
     };
   }
@@ -23,13 +23,15 @@ export default function Home() {
     }
   }, [connectionStatus]);
 
-  const getSignatureMessage = async () => {
-    const result = await getSignature();
-    const message = result.data.getSignatureMessage;
-    signMessage(message);
-  };
+  function getSignatureMessage() {
+    getSignature().then((result) => {
+      const message = result.data.getSignatureMessage;
+      console.log(`sig message ${message}`);
+      signMessage(message);
+    });
+  }
 
-  const signMessage = async (message) => {
+  async function signMessage(message) {
     try {
       const signedHash = await signer.signMessage(message);
       localStorage.setItem("signature_token", signedHash);
@@ -38,7 +40,7 @@ export default function Home() {
       console.error(e.message);
       // Assuming disconnectAccount or any error handling logic is defined here
     }
-  };
+  }
 
   return <ConnectWallet />;
 }
