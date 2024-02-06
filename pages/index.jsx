@@ -1,11 +1,16 @@
+import {
+  useConnectionStatus,
+  useDisconnect,
+  useSigner,
+} from "@thirdweb-dev/react";
 import { useEffect } from "react";
-import { useConnectionStatus, useSigner } from "@thirdweb-dev/react";
 // import { ConnectWallet } from './components'; // Adjust the path to where your ConnectWallet component is
 import { ConnectWallet } from "@thirdweb-dev/react";
 
 export default function Home() {
   const connectionStatus = useConnectionStatus();
   const signer = useSigner();
+  const disconnect = useDisconnect();
 
   // Integrated simplified getSignature function
   async function getSignature() {
@@ -17,12 +22,6 @@ export default function Home() {
     };
   }
 
-  useEffect(() => {
-    if (connectionStatus && connectionStatus === "connected") {
-      getSignatureMessage();
-    }
-  }, [connectionStatus]);
-
   function getSignatureMessage() {
     getSignature().then((result) => {
       const message = result.data.getSignatureMessage;
@@ -32,21 +31,22 @@ export default function Home() {
   }
 
   async function signMessage(message) {
-    if (!signer) {
-      console.error("Waiting for wallet to connect...");
-      return;
-    }
-
     try {
       const signedHash = await signer.signMessage(message);
       console.log(`signed hash ${signedHash}`);
       localStorage.setItem("signature_token", signedHash);
       // Assuming getToken and subsequent logic are defined or integrated here
     } catch (e) {
-      console.error(e.message);
-      // Assuming disconnectAccount or any error handling logic is defined here
+      console.error("Error signing message", e);
+      disconnect();
     }
   }
+
+  useEffect(() => {
+    if (signer && connectionStatus && connectionStatus === "connected") {
+      getSignatureMessage();
+    }
+  }, [connectionStatus, signer]);
 
   return <ConnectWallet />;
 }
