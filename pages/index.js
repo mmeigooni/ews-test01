@@ -32,8 +32,14 @@ export default function Home() {
   }
 
   async function signMessage(message) {
+    if (!signer) {
+      console.error("Waiting for wallet to connect...");
+      return;
+    }
+
     try {
       const signedHash = await signer.signMessage(message);
+      console.log(`signed hash ${signedHash}`);
       localStorage.setItem("signature_token", signedHash);
       // Assuming getToken and subsequent logic are defined or integrated here
     } catch (e) {
